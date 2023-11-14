@@ -44,6 +44,7 @@ class Tag(models.Model):
         unique=True,
     )
 
+
 class Recipe(models.Model):
     author = models.ForeignKey(
         User,
@@ -66,7 +67,7 @@ class Recipe(models.Model):
     )
     text = models.TextField(
         verbose_name="Описание рецепта"
-        )
+    )
     ingredients = models.ManyToManyField(
         Ingredient,
         verbose_name="Ингредиенты",
@@ -153,6 +154,7 @@ class Cart(models.Model):
         related_name="cart_user",
         on_delete=models.CASCADE,
     )
+
     class Meta:
         verbose_name = "Избранный рецепт"
         verbose_name_plural = "Избранные рецепты"
@@ -177,6 +179,7 @@ class Favorite(models.Model):
         related_name="favorite_user",
         on_delete=models.CASCADE,
     )
+
     class Meta:
         verbose_name = "Избранный рецепт"
         verbose_name_plural = "Избранные рецепты"

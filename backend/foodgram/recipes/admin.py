@@ -9,10 +9,12 @@ class IngredientAdmin(admin.ModelAdmin):
     list_display = ("id", "name", "measurement_unit")
     search_fields = ("name", "measurement_unit")
 
+
 @admin.register(Tag)
 class TagAdmin(admin.ModelAdmin):
     list_display = ("name", "color", "slug")
     search_fields = ("name", "slug")
+
 
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
