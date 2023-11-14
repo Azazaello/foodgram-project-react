@@ -54,7 +54,9 @@ class UserSerializer(serializers.ModelSerializer):
         user = self.context.get("request").user
         return (
             not user.is_anonymous
-            and Subscription.objects.filter(user=user, author=object.id).exists()
+            and Subscription.objects.filter(
+                user=user,
+                author=object.id).exists()
         )
 
 
