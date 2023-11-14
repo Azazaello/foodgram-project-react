@@ -7,12 +7,12 @@ load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'django-insecure-d%d93i*y((zk2uqbhj$qmubl0tm2v#@f!p2n!u&vb0h*l%c^%3'
+SECRET_KEY =SECRET_KEY = os.getenv('SECRET_KEY', default='django-insecure-d%d93i*y((zk2uqbhj$qmubl0tm2v#@f!p2n!u&vb0h*l%c^%3')
 
 
-DEBUG = True
+DEBUG = os.getenv('DEBUG_VALUE', 'False') == 'True'
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '127.0.0.1 localhost kitpro.ddns.net').split()
 
 
 INSTALLED_APPS = [
@@ -106,8 +106,11 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
-STATIC_URL = '/static/'
+STATIC_URL = '/backend_static/'
+STATIC_ROOT = BASE_DIR / 'collected_static'
 
+MEDIA_URL = '/media/'
+MEDIA_ROOT = '/media/'
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
