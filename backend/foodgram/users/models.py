@@ -2,40 +2,33 @@ from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import UniqueConstraint
-from django.utils.translation import gettext_lazy as _
-
-
-def validate_not_following_self(value):
-    if value.user == value.author:
-        raise ValidationError(
-            _("Нельзя подписаться на самого себя"),
-            code="invalid",
-        )
 
 
 class User(AbstractUser):
+    username = models.CharField(
+        verbose_name="Логин",
+        max_length=100,
+        unique=True
+    )
     email = models.EmailField(
-        verbose_name="Электронная почта", unique=True, max_length=254
+        verbose_name="Электронная почта",
+        max_length=200,
+        unique=True,
     )
-    first_name = models.CharField(
-        verbose_name="Имя",
-        max_length=150,
+    password = models.CharField(
+        verbose_name="Пароль",
+        max_length=100
     )
-    last_name = models.CharField(
-        verbose_name="Фамилия",
-        max_length=150,
-    )
-
     USERNAME_FIELD = "email"
-    REQUIRED_FIELDS = ("username", "first_name", "last_name")
+    REQUIRED_FIELDS = (
+        "username",
+        "password",
+    )
 
     class Meta:
         verbose_name = "Пользователь"
-        constraints = [
-            models.UniqueConstraint(
-                fields=("username", "email"), name="unique_user"
-            )
-        ]
+        verbose_name_plural = 'Пользователи'
+
 
     def __str__(self):
         return self.username
@@ -44,16 +37,15 @@ class User(AbstractUser):
 class Subscription(models.Model):
     user = models.ForeignKey(
         User,
+        on_delete=models.CASCADE,
         verbose_name="Подписчик",
         related_name="subscriber",
-        on_delete=models.CASCADE,
-        validators=[validate_not_following_self],
     )
-    author = models.ForeignKey(
+    subscribing = models.ForeignKey(
         User,
-        verbose_name="Автор",
-        related_name="subscribing",
         on_delete=models.CASCADE,
+        verbose_name="Подписавшийся",
+        related_name="subscribing",
     )
 
     class Meta:
@@ -65,4 +57,8 @@ class Subscription(models.Model):
         ]
 
     def __str__(self):
-        return f"Автор: {self.author}, подписчик: {self.user}"
+        return f"Автор: {self.user.username}, подписчик: {self.subscribing.username}"
+
+    def following_self(self):
+        if self.user == self.subscribing:
+            raise ValidationError('Нельзя подписаться на самого себя')

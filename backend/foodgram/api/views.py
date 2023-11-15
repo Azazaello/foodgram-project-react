@@ -5,7 +5,7 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet
-from recipes.models import (Cart, Favorite, Ingredient, IngredientInRecipe,
+from recipes.models import (Basket, Favorite, Ingredient, IngredientInRecipe,
                             Recipe, Tag)
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
@@ -17,9 +17,9 @@ from users.models import Subscription, User
 
 from .filters import IngredientFilter, RecipeFilter
 from .permissions import IsAuthorOrReadOnly
-from .serializers import (FollowSerializer, GetRecipeSerializer,
-                          IngredientSerializer, RecipeSerializer,
-                          RecipeShortSerializer, TagSerializer, UserSerializer)
+from .serializers import (GetRecipeSerializer, IngredientSerializer,
+                          RecipeCartSerializer, RecipeSerializer,
+                          SubscribeSerializer, TagSerializer, UserSerializer)
 
 
 class UserViewSet(UserViewSet):
@@ -36,7 +36,7 @@ class UserViewSet(UserViewSet):
     def subscriptions(self, request):
         queryset = Subscription.objects.filter(author=request.user)
         page = self.paginate_queryset(queryset)
-        serializer = FollowSerializer(
+        serializer = SubscribeSerializer(
             page, many=True, context={"request": request}
         )
         return self.get_paginated_response(serializer.data)
@@ -66,7 +66,7 @@ class UserViewSet(UserViewSet):
                 {"errors": "Вы уже подписаны на этого пользователя."}
             )
         follow = model.objects.create(user=user, author=author)
-        serializer = FollowSerializer(follow, context={"request": request})
+        serializer = SubscribeSerializer(follow, context={"request": request})
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def del_subscribe(self, model, request, id):
@@ -129,9 +129,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
     )
     def shopping_cart(self, request, pk):
         if request.method == "POST":
-            return self.add_to(Cart, request.user, pk)
+            return self.add_to(Basket, request.user, pk)
         else:
-            return self.delete_from(Cart, request.user, pk)
+            return self.delete_from(Basket, request.user, pk)
 
     def add_to(self, model, user, pk):
         if model.objects.filter(user=user, recipe__id=pk).exists():
@@ -141,7 +141,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             )
         recipe = get_object_or_404(Recipe, id=pk)
         model.objects.create(user=user, recipe=recipe)
-        serializer = RecipeShortSerializer(recipe)
+        serializer = RecipeCartSerializer(recipe)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def delete_from(self, model, user, pk):
